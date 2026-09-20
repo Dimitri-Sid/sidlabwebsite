@@ -1,0 +1,81 @@
+---
+import '../styles/global.css';
+import { site, nav } from '../config';
+
+interface Props { title?: string; description?: string; hero?: boolean }
+const { title, description = `${site.fullName}, ${site.institution}. ${site.tagline}`, hero = false } = Astro.props;
+const fullTitle = title ? `${title} | ${site.name}` : `${site.name} – ${site.fullName}`;
+const path = Astro.url.pathname;
+const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <script is:inline>
+      try {
+        const t = localStorage.getItem('theme');
+        if (t) document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
+  </head>
+  <body class={hero ? 'has-hero' : ''}>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="header">
+      <a class="brand" href="/"><img src="/logo.png" alt="" width="38" height="38" />SIDlab</a>
+      <div class="head-actions">
+        <button class="theme-btn" id="theme-btn" aria-label="Toggle dark mode">◐</button>
+        <button class="menu-btn" id="menu-btn" aria-label="Menu" aria-expanded="false">☰</button>
+      </div>
+    </header>
+
+    <nav class="side-nav" id="nav" aria-label="Main">
+      {nav.map((n) => (
+        <a href={n.href} aria-current={active(n.href) ? 'page' : undefined}>{n.label}</a>
+      ))}
+    </nav>
+
+    <slot />
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <div>© {new Date().getFullYear()} {site.fullName} · {site.institution}</div>
+        <div>
+          <span>{site.email}</span>
+          {site.links.map((l) => <> · <a href={l.href} rel="noopener">{l.label}</a></>)}
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const header = document.getElementById('header')!;
+      const onScroll = () => header.classList.toggle('solid', scrollY > 40);
+      onScroll();
+      addEventListener('scroll', onScroll, { passive: true });
+
+      const menuBtn = document.getElementById('menu-btn')!;
+      const navEl = document.getElementById('nav')!;
+      menuBtn.addEventListener('click', () => {
+        const open = navEl.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', String(open));
+      });
+
+      document.getElementById('theme-btn')!.addEventListener('click', () => {
+        const root = document.documentElement;
+        const dark = root.dataset.theme
+          ? root.dataset.theme === 'dark'
+          : matchMedia('(prefers-color-scheme: dark)').matches;
+        const next = dark ? 'light' : 'dark';
+        root.dataset.theme = next;
+        try { localStorage.setItem('theme', next); } catch {}
+      });
+    </script>
+  </body>
+</html>

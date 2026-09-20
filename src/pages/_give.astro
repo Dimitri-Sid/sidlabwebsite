@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import { getEntry, render } from 'astro:content';
+import { site } from '../config';
+
+const page = (await getEntry('pages', 'give'))!;
+const { Content } = await render(page);
+---
+<Base title="Give">
+  <main id="main" class="page"><div class="wrap prose give">
+    <h1>{page.data.title}</h1>
+    <Content />
+    {site.giveUrl
+      ? <a class="btn" href={site.giveUrl} rel="noopener" target="_blank">Donate here</a>
+      : <span class="btn disabled" aria-disabled="true">Donation link coming soon</span>}
+  </div></main>
+</Base>

@@ -1,0 +1,67 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+const all = (await getCollection('people')).sort((a, b) => a.data.order - b.data.order || a.data.name.localeCompare(b.data.name));
+const groups = [
+  { key: 'pi', title: 'Principal Investigator' },
+  { key: 'member', title: 'Current Members' },
+  { key: 'collaborator', title: 'Affiliated Institutions & Collaborators' },
+] as const;
+// affiliated labs and collaborators are shown as compact text cards
+const compact = (k: string) => k === 'collaborator';
+const withBody = await Promise.all(all.map(async (p) => ({ p, ...(await render(p)) })));
+const initials = (n: string) => n.split(/\s+/).map((w) => w[0]).slice(0, 2).join('');
+---
+<Base title="People">
+  <main id="main" class="page"><div class="wrap">
+    <h1>People</h1>
+    {groups.map((g) => {
+      const items = withBody.filter((x) => x.p.data.group === g.key);
+      if (!items.length) return null;
+      return (
+        <>
+          {g.key !== 'pi' && <h2 class="group-title">{g.title}</h2>}
+          {compact(g.key) ? (
+            <div class="res-grid">
+              {items.map(({ p, Content }) => (
+                <article class="res">
+                  <h3>{p.data.name}</h3>
+                  <p class="role">{p.data.role}{p.data.institution && ` · ${p.data.institution}`}</p>
+                  <div class="body"><Content /></div>
+                  {(p.data.links.length > 0 || p.data.email) && (
+                    <div class="pub-links">
+                      {p.data.links.map((l) => <a href={l.href} rel="noopener">{l.label}</a>)}
+                      {p.data.email && <span>{p.data.email}</span>}
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div class={g.key === 'pi' ? '' : 'people'}>
+              {items.map(({ p, Content }) => (
+                <div class={g.key === 'pi' ? 'pi-card' : ''}>
+                  <div class="person">
+                    <div class="ph">
+                      {p.data.photo ? <img src={p.data.photo} alt={p.data.name} loading="lazy" /> : <span>{initials(p.data.name)}</span>}
+                    </div>
+                    <div>
+                      <h3>{p.data.name}</h3>
+                      <p class="role">{p.data.role}</p>
+                      <div class="bio"><Content /></div>
+                      <div class="links">
+                        {p.data.email && <span>{p.data.email}</span>}
+                        {p.data.links.map((l) => <a href={l.href} rel="noopener">{l.label}</a>)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      );
+    })}
+  </div></main>
+</Base>

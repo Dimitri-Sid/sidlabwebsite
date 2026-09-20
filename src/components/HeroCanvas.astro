@@ -1,0 +1,135 @@
+---
+// Decorative hero: cells drifting and joining into constellations, in the logo's colours.
+// Purely visual; hidden from assistive tech and static under prefers-reduced-motion.
+---
+<canvas aria-hidden="true" id="hero-net"></canvas>
+<script>
+  const c = document.getElementById('hero-net') as HTMLCanvasElement | null;
+  if (c) {
+    const ctx = c.getContext('2d')!;
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    // Brightened logo colours plus one accent (teal). Repeat an entry to make it more common.
+    const COBALT = '40,124,224', CREAM = '246,244,230', GOLD = '245,184,50', TEAL = '46,214,190';
+    const FILLS = [COBALT, COBALT, COBALT, CREAM, GOLD, TEAL];
+    const RINGS = [GOLD, CREAM, TEAL, '110,175,255'];
+    let w = 0, h = 0, scale = 1;
+
+    type Cell = { x: number; y: number; vx: number; vy: number; bx: number; by: number; r: number; rgb: string; ring: string; a: number; ph: number };
+    const rnd = (a: number, b: number) => a + Math.random() * (b - a);
+    const pick = <T,>(xs: T[]) => xs[Math.floor(Math.random() * xs.length)];
+    // Small cells drift fast, big ones slowly: reads as depth.
+    const speed = (r: number) => 0.00007 * Math.max(0.3, 2.4 - r * 0.07);
+    const make = (n: number, rMin: number, rMax: number, a: number, fills = FILLS): Cell[] =>
+      Array.from({ length: n }, () => {
+        const rgb = pick(fills);
+        const r = rnd(rMin, rMax);
+        const bx = rnd(-1, 1) * speed(r), by = rnd(-1, 1) * speed(r);
+        return {
+          x: Math.random(), y: Math.random(), vx: bx, vy: by, bx, by,
+          r, rgb, ring: pick(RINGS.filter((c) => c !== rgb)), a, ph: rnd(0, 6.283),
+        };
+      });
+    const cells: Cell[] = [
+      ...make(9, 18, 30, 1),                 // big cells
+      ...make(12, 8, 17, 0.95),
+      ...make(9, 10, 20, 0.75),                 // dimmer so the title stays legible
+      ...make(10, 3, 7, 0.85),
+      ...make(14, 1.5, 3, 0.8, [CREAM, GOLD]),  // specks
+    ];
+
+    const resize = () => {
+      w = c.clientWidth; h = c.clientHeight;
+      c.width = w * dpr; c.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      scale = Math.max(0.6, Math.min(w, h) / 850);
+    };
+
+    // Aggregation: cells pull gently toward nearby cells (big cells pull harder), never overlap,
+    // and relax back to their own drift, so clusters form and dissolve instead of collapsing.
+    const PULL = 0.00003, RELAX = 0.0007, PUSH = 0.0004, SHOVE = 0.0005;
+    let mouse: { x: number; y: number } | null = null;
+    const flock = (dt: number) => {
+      const reach = Math.min(w, h) * 0.42;
+      for (let i = 0; i < cells.length; i++) {
+        const a = cells[i];
+        for (let j = i + 1; j < cells.length; j++) {
+          const b = cells[j];
+          const dx = (b.x - a.x) * w, dy = (b.y - a.y) * h;
+          const d = Math.hypot(dx, dy) || 1;
+          if (d > reach) continue;
+          const touch = (a.r + b.r) * scale + 10 * scale;
+          const f = d < touch ? -PUSH * (1 - d / touch) * 3 : PULL * (1 - d / reach);
+          const ux = dx / d, uy = dy / d;
+          // acceleration is weighted by the *other* cell's size
+          const ka = f * (b.r / 20 + 0.15) * dt, kb = f * (a.r / 20 + 0.15) * dt;
+          a.vx += (ux * ka) / w; a.vy += (uy * ka) / h;
+          b.vx -= (ux * kb) / w; b.vy -= (uy * kb) / h;
+        }
+      }
+      for (const p of cells) {
+        if (mouse) { // cursor pushes cells away; lighter (smaller) cells get shoved harder
+          const dx = p.x * w - mouse.x, dy = p.y * h - mouse.y;
+          const d = Math.hypot(dx, dy) || 1;
+          const R = 170 * scale;
+          if (d < R) {
+            const k = (SHOVE * (1 - d / R) * dt) / (0.6 + p.r / 25);
+            p.vx += ((dx / d) * k) / w; p.vy += ((dy / d) * k) / h;
+          }
+        }
+        p.vx += (p.bx - p.vx) * RELAX * dt; p.vy += (p.by - p.vy) * RELAX * dt;
+      }
+    };
+
+    const draw = (t: number) => {
+      ctx.clearRect(0, 0, w, h);
+      const maxD = Math.min(w, h) * 0.26;
+      // constellation lines first, so cells sit on top of them
+      ctx.lineWidth = 1.8;
+      for (let i = 0; i < cells.length; i++) {
+        const a = cells[i];
+        if (a.r < 5) continue;
+        for (let j = i + 1; j < cells.length; j++) {
+          const b = cells[j];
+          if (b.r < 5) continue;
+          const d = Math.hypot((a.x - b.x) * w, (a.y - b.y) * h);
+          if (d < maxD) {
+            ctx.strokeStyle = `rgba(${CREAM},${0.55 * (1 - d / maxD)})`;
+            ctx.beginPath(); ctx.moveTo(a.x * w, a.y * h); ctx.lineTo(b.x * w, b.y * h); ctx.stroke();
+          }
+        }
+      }
+      for (const p of cells) {
+        const r = p.r * scale * (1 + 0.05 * Math.sin(t / 1100 + p.ph)); // slow "breathing"
+        ctx.fillStyle = `rgba(${p.rgb},${p.a})`;
+        ctx.beginPath(); ctx.arc(p.x * w, p.y * h, r, 0, 6.283); ctx.fill();
+        if (p.r >= 8) { // thin ring around the larger cells, echoing the logo's ring
+          ctx.strokeStyle = `rgba(${p.ring},0.9)`;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.arc(p.x * w, p.y * h, r + 4 * scale, 0, 6.283); ctx.stroke();
+        }
+      }
+    };
+
+    resize();
+    addEventListener('resize', () => { resize(); if (still) draw(0); });
+    if (still) draw(0);
+    else {
+      const hero = c.parentElement!;
+      hero.addEventListener('pointermove', (e) => {
+        const r = c.getBoundingClientRect();
+        mouse = { x: e.clientX - r.left, y: e.clientY - r.top };
+      });
+      hero.addEventListener('pointerleave', () => { mouse = null; });
+      let last = performance.now();
+      const tick = (t: number) => {
+        const dt = Math.min(t - last, 50); last = t;
+        flock(dt);
+        for (const p of cells) { p.x = (p.x + p.vx * dt + 1) % 1; p.y = (p.y + p.vy * dt + 1) % 1; }
+        draw(t);
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+  }
+</script>

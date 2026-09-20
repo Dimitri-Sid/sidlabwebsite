@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+const items = (await getCollection('resources')).sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title));
+const rendered = await Promise.all(items.map(async (r) => ({ r, ...(await render(r)) })));
+// categories in order of first appearance (i.e. by lowest `order`)
+const categories = [...new Set(items.map((r) => r.data.category))];
+---
+<Base title="Resources">
+  <main id="main" class="page"><div class="wrap">
+    <h1>Resources</h1>
+    <p class="lede">Software, data and protocols from the lab.</p>
+    {categories.map((cat) => (
+      <>
+        <h2 class="group-title">{cat}</h2>
+        <div class="res-grid">
+          {rendered.filter((x) => x.r.data.category === cat).map(({ r, Content }) => (
+            <article class="res">
+              <h3>{r.data.title}</h3>
+              <div class="body"><Content /></div>
+              {r.data.links.length > 0 && (
+                <div class="pub-links">
+                  {r.data.links.map((l) => <a href={l.href} rel="noopener">{l.label}</a>)}
+                </div>
+              )}
+            </article>
+          ))}
+        </div>
+      </>
+    ))}
+  </div></main>
+</Base>

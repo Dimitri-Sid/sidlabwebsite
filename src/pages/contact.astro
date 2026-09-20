@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../config';
+---
+<Base title="Contact">
+  <main id="main" class="page"><div class="wrap">
+    <h1>Contact</h1>
+    <div class="contact-grid">
+      <div>
+        <h2>Email</h2>
+        <dl class="emails">
+          <dt>Lab</dt>
+          <dd>{site.contactEmail}</dd>
+          <dt>Principal Investigator</dt>
+          <dd>{site.email}</dd>
+        </dl>
+        <h2>Visit</h2>
+        <address>
+          {site.address.map((l) => <>{l}<br /></>)}
+        </address>
+        <a class="btn" href={site.mapUrl} rel="noopener" target="_blank">Get directions</a>
+      </div>
+      {site.contactImage && (
+        <a class="contact-img" href={site.mapUrl} rel="noopener" target="_blank" aria-label="Open in Google Maps">
+          <img src={site.contactImage} alt="The building that houses SIDlab" loading="lazy" />
+        </a>
+      )}
+    </div>
+  </div></main>
+</Base>

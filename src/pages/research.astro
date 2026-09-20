@@ -1,0 +1,59 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+const themes = (await getCollection('research')).sort((a, b) => a.data.order - b.data.order);
+const funders = (await getCollection('funding')).sort((a, b) => a.data.order - b.data.order || a.data.name.localeCompare(b.data.name));
+const rendered = await Promise.all(themes.map(async (t) => ({ t, ...(await render(t)) })));
+---
+<Base title="Research">
+  <main id="main" class="page"><div class="wrap">
+    <h1>Research</h1>
+    {rendered.map(({ t, Content }) => (
+      <section class="theme-block" id={t.id}>
+        <h2>{t.data.title}</h2>
+        {t.data.question && <p class="q">{t.data.question}</p>}
+        <div class="prose"><Content /></div>
+        {t.data.image && (
+          <figure class="fig">
+            <div class="fig-img">
+              {t.data.imageLink
+                ? <a href={t.data.imageLink} rel="noopener" target="_blank" title="Open the paper"><img src={t.data.image} alt={t.data.caption ?? t.data.title} loading="lazy" /></a>
+                : <img src={t.data.image} alt={t.data.caption ?? t.data.title} loading="lazy" />}
+            </div>
+            {t.data.caption && <figcaption>{t.data.caption}</figcaption>}
+            {(t.data.citation || t.data.doi) && (
+              <p class="cite">
+                {t.data.citation}
+                {t.data.doi && <> <a href={`https://doi.org/${t.data.doi}`} rel="noopener" target="_blank">doi:{t.data.doi}</a></>}
+              </p>
+            )}
+          </figure>
+        )}
+      </section>
+    ))}
+
+    {funders.length > 0 && (
+      <section class="funding" id="funding">
+        <h2>Funding</h2>
+        <p class="lede">Our work is supported by:</p>
+        <div class="fund-grid">
+          {funders.map((f) => {
+            const inner = (
+              <>
+                {f.data.logo && <span class="logo"><img src={f.data.logo} alt="" loading="lazy" /></span>}
+                <div>
+                  <strong>{f.data.name}</strong>
+                  {f.data.grant && <span>{f.data.grant}</span>}
+                </div>
+              </>
+            );
+            return f.data.url
+              ? <a class="fund" href={f.data.url} rel="noopener" target="_blank">{inner}</a>
+              : <div class="fund">{inner}</div>;
+          })}
+        </div>
+      </section>
+    )}
+  </div></main>
+</Base>

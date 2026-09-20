@@ -1,0 +1,66 @@
+---
+import Base from '../layouts/Base.astro';
+import HeroCanvas from '../components/HeroCanvas.astro';
+import NewsTitle from '../components/NewsTitle.astro';
+import { getCollection, render } from 'astro:content';
+import { site } from '../config';
+
+const news = (await getCollection('news')).sort((a, b) => +b.data.date - +a.data.date || a.data.title.localeCompare(b.data.title)).slice(0, 4);
+const newsRendered = await Promise.all(news.map(async (n) => ({ n, ...(await render(n)) })));
+const fmt = (d: Date) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', timeZone: 'UTC' });
+---
+<Base hero>
+  <section class="hero">
+    <HeroCanvas />
+    <div class="hero-inner">
+      <h1 class="full"><span class="sid">S</span>ystems <span class="sid">I</span>mmuno<span class="sid">D</span>ynamics Lab</h1>
+      <p>{site.tagline}</p>
+      <a class="learn" href="/research/">Learn more</a>
+      <div class="inst">{site.institution}</div>
+    </div>
+    <a class="next" href="#welcome">Scroll</a>
+    <div class="inst-logos">
+      <a href="https://www.hopkinsmedicine.org/" rel="noopener" target="_blank">
+        <img class="jhu" src="/jhu-som-logo.png" alt="Johns Hopkins School of Medicine" />
+      </a>
+      <div class="lab">
+        <img src="/logo.png" alt="" />
+        <span>{site.name}</span>
+      </div>
+    </div>
+  </section>
+
+  <main id="main">
+    <section class="band" id="welcome">
+      <div class="wrap welcome-grid">
+        <div>
+          <h2>Welcome</h2>
+          <div class="welcome-text">
+            {site.welcome.map((para) => <p>{para}</p>)}
+          </div>
+        </div>
+        <div id="news">
+          <h2>News</h2>
+          {newsRendered.length === 0 && <p class="lede">Nothing yet. Check back soon.</p>}
+          <ul class="news-list compact">
+            {newsRendered.map(({ n, Content }) => (
+              <li>
+                <time>{fmt(n.data.date)}</time>
+                <div class="body"><NewsTitle title={n.data.title} link={n.data.link} outlet={n.data.outlet} /><Content /></div>
+              </li>
+            ))}
+          </ul>
+          <p><a href="/news/">All news & media →</a></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="band cta">
+      <div class="wrap">
+        <h2>Join the lab</h2>
+        <p>We are always interested in hearing from curious, motivated people.</p>
+        <a class="btn" href="/join/">Opportunities</a>
+      </div>
+    </section>
+  </main>
+</Base>

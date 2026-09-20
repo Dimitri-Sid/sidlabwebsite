@@ -1,0 +1,8 @@
+---
+interface Props { title: string; link?: string; outlet?: string }
+const { title, link, outlet } = Astro.props;
+---
+<strong>
+  {link ? <a href={link} rel="noopener" target="_blank">{title}</a> : title}
+</strong>
+{outlet && <span class="outlet">{outlet} <span class="tag">press</span></span>}

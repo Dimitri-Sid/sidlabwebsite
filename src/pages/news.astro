@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import NewsTitle from '../components/NewsTitle.astro';
+import { getCollection, render } from 'astro:content';
+
+const items = (await getCollection('news')).sort((a, b) => +b.data.date - +a.data.date || a.data.title.localeCompare(b.data.title));
+const rendered = await Promise.all(items.map(async (n) => ({ n, ...(await render(n)) })));
+const fmt = (d: Date, precision: string) =>
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', ...(precision === 'day' && { day: 'numeric' }), timeZone: 'UTC' });
+---
+<Base title="News & Media">
+  <main id="main" class="page"><div class="wrap prose" style="max-width:52em">
+    <h1>News & Media</h1>
+    <p class="lede">Updates, press and media coverage from the lab.</p>
+    <ul class="news-list">
+      {rendered.map(({ n, Content }) => (
+        <li>
+          <time>{fmt(n.data.date, n.data.precision)}</time>
+          <div class="body"><NewsTitle title={n.data.title} link={n.data.link} outlet={n.data.outlet} /><Content /></div>
+        </li>
+      ))}
+    </ul>
+  </div></main>
+</Base>

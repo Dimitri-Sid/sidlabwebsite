@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import PubCard from '../components/PubCard.astro';
+import { getCollection } from 'astro:content';
+
+const all = (await getCollection('publications')).sort((a, b) => b.data.year - a.data.year || (b.data.date ?? '').localeCompare(a.data.date ?? '') || a.data.title.localeCompare(b.data.title));
+const preprints = all.filter((p) => p.data.preprint);
+const published = all.filter((p) => !p.data.preprint);
+const years = [...new Set(published.map((p) => p.data.year))];
+---
+<Base title="Publications">
+  <main id="main" class="page"><div class="wrap prose" style="max-width:52em">
+    <h1>Publications</h1>
+    <p class="lede">Papers and preprints from the lab.</p>
+
+    {preprints.length > 0 && published.length > 0 && (
+      <p class="jump"><a href="#preprints">Preprints ({preprints.length})</a> · <a href="#published">Published ({published.length})</a></p>
+    )}
+
+    {preprints.length > 0 && (
+      <section id="preprints">
+        <h2 class="section-title">Preprints</h2>
+        {preprints.map((p) => <PubCard pub={p} showYear />)}
+      </section>
+    )}
+
+    {published.length > 0 && (
+      <section id="published">
+        {preprints.length > 0 && <h2 class="section-title">Published</h2>}
+        {years.map((y) => (
+          <>
+            <h3 class="year">{y}</h3>
+            {published.filter((p) => p.data.year === y).map((p) => <PubCard pub={p} />)}
+          </>
+        ))}
+      </section>
+    )}
+  </div></main>
+</Base>

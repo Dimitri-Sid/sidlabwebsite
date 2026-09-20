@@ -1,0 +1,37 @@
+---
+import type { CollectionEntry } from 'astro:content';
+interface Props { pub: CollectionEntry<'publications'>; showYear?: boolean }
+const { pub, showYear = false } = Astro.props;
+const p = pub.data;
+// Bold the PI's name in author lists: set to how it appears in your papers.
+const highlight = ['Sidiropoulos'];
+const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const bold = (t: string) => esc(t).replace(new RegExp(`(${highlight.join('|')})`, 'g'), '<b>$1</b>');
+// Long author lists show a preview, with the full list behind a toggle.
+const LIMIT = 200;
+let preview = '';
+if (p.authors.length > LIMIT + 40) {
+  const cut = p.authors.lastIndexOf(', ', LIMIT);
+  preview = p.authors.slice(0, cut > 0 ? cut : LIMIT);
+}
+---
+<article class="pub">
+  <h3>{p.title}</h3>
+  {preview ? (
+    <details class="authors">
+      <summary><span set:html={bold(preview)} />, … <span class="toggle">show all {p.authors.split(', ').length} authors</span></summary>
+      <span set:html={bold(p.authors)} />
+    </details>
+  ) : (
+    <div class="authors" set:html={bold(p.authors)} />
+  )}
+  <div class="venue">{p.venue}{p.details && `, ${p.details}`}{showYear && ` (${p.year})`}</div>
+  <div class="pub-links">
+    {p.pmid && <a href={`https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/`} rel="noopener">pubmed</a>}
+    {p.doi && <a href={`https://doi.org/${p.doi}`} rel="noopener">doi</a>}
+    {p.preprintUrl && <a href={p.preprintUrl} rel="noopener">preprint</a>}
+    {p.pdf && <a href={p.pdf} rel="noopener">pdf</a>}
+    {p.code && <a href={p.code} rel="noopener">code</a>}
+    {p.data && <a href={p.data} rel="noopener">data</a>}
+  </div>
+</article>
