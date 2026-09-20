@@ -1,7 +1,7 @@
 ---
 title: Join us
 ---
-We are actively recruiting graduate students and postdoctoral fellows interested in hacking the immune system using a combination of experimental and computational approaches. Interested candidates should email a CV and a brief summary of their research interests to sdimitri (at) jhmi (dot) edu.
+We are actively recruiting graduate students and postdoctoral fellows interested in understanding and engineering the immune system using experimental and computational approaches. Undergraduate students are also welcome to inquire about research opportunities. Interested candidates should email a CV and a brief statement of research interests to sdimitri (at) jhmi (dot) edu.
 
 ## Open positions
 
