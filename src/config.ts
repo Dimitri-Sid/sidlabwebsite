@@ -9,7 +9,7 @@ export const site = {
     'Led by Dr. Dimitri Sidiropoulos, the Systems ImmunoDynamics Lab works to understand how cancer and the immune system change together over time. We use patient samples, cutting-edge technologies, and computational tools to uncover new molecular targets and determine why treatments succeed or fail. Our goal is to transform these insights into new therapies and strategies for cancer interception and treatment.',
   ],
   // Emails are written out so address-harvesting bots don't pick them up.
-  email: 'sdimitri (at) jhmi (dot) edu', // the PI: footer, Contact page, Join page
+  email: 'sdimitri (at) jhmi (dot) edu', // the PI: Contact page, Join page
   contactEmail: 'sidlab.ops (at) gmail (dot) com', // lab email (Contact page only)
   address: [
     'Cancer Research Building 1 (CRB1), Room 416',

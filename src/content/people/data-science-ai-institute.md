@@ -2,7 +2,7 @@
 name: "Data Science and AI Institute"
 role: "Institute"
 institution: "Johns Hopkins University"
-group: collaborator
+group: institution
 order: 3
 links:
   - { label: Website, href: https://ai.jhu.edu/ }

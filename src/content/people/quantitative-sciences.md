@@ -2,7 +2,7 @@
 name: "Division of Quantitative Sciences"
 role: "Division"
 institution: "Department of Oncology, Johns Hopkins School of Medicine"
-group: collaborator
+group: institution
 order: 2
 links:
   - { label: Website, href: https://oncologyqs.jhmi.edu/ }

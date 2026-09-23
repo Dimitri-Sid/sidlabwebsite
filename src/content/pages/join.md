@@ -16,3 +16,9 @@ Support research in computational immunology and spatial multi-omics by running 
 Build reproducible pipelines to analyze single-cell, spatial, genomic, immune-repertoire, imaging and flow-cytometry data, and turn results into figures and manuscripts. Full-time, Baltimore, MD. Suited to a background in bioinformatics, computational biology, biostatistics or data science.
 
 [View and apply on JHU Careers →](https://hiring.jhu.edu/careers/job/1133915440866)
+
+### Research Technologist (Oncology)
+
+Perform laboratory experiments and assays, prepare next-generation sequencing libraries (including immune-receptor and targeted sequencing), help optimize new molecular and sequencing workflows, and support mouse cancer model studies of immune responses. Full-time, Baltimore, MD. Requires a bachelor's degree in biology, chemistry or a related field; experience with sequencing-library preparation, mouse work, or immunology is a plus.
+
+[View and apply on JHU Careers →](https://hiring.jhu.edu/careers/job/1133915922086)

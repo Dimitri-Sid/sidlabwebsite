@@ -25,7 +25,7 @@ export const collections = {
       name: z.string(),
       role: z.string(), // "Principal Investigator", "PhD Student", …
       institution: z.string().optional(), // shown for affiliate labs and collaborators
-      group: z.enum(['pi', 'member', 'collaborator']).default('member'), // 'collaborator' = affiliated labs and collaborators
+      group: z.enum(['pi', 'member', 'institution', 'collaborator']).default('member'), // 'institution' = affiliated institutions, 'collaborator' = collaborating labs
       order: z.number().default(100),
       photo: z.string().optional(), // /images/people/name.jpg
       email: z.string().optional(),

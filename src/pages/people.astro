@@ -6,10 +6,11 @@ const all = (await getCollection('people')).sort((a, b) => a.data.order - b.data
 const groups = [
   { key: 'pi', title: 'Principal Investigator' },
   { key: 'member', title: 'Current Members' },
-  { key: 'collaborator', title: 'Affiliated Institutions & Collaborators' },
+  { key: 'institution', title: 'Affiliated Institutions' },
+  { key: 'collaborator', title: 'Collaborators' },
 ] as const;
-// affiliated labs and collaborators are shown as compact text cards
-const compact = (k: string) => k === 'collaborator';
+// affiliated institutions and collaborators are shown as compact text cards
+const compact = (k: string) => k === 'institution' || k === 'collaborator';
 const withBody = await Promise.all(all.map(async (p) => ({ p, ...(await render(p)) })));
 const initials = (n: string) => n.split(/\s+/).map((w) => w[0]).slice(0, 2).join('');
 ---

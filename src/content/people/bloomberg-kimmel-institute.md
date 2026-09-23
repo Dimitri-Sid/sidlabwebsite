@@ -2,7 +2,7 @@
 name: "Bloomberg~Kimmel Institute for Cancer Immunotherapy"
 role: "Institute"
 institution: "Sidney Kimmel Comprehensive Cancer Center, Johns Hopkins"
-group: collaborator
+group: institution
 order: 4
 links:
   - { label: Website, href: https://www.hopkinsmedicine.org/kimmel-cancer-center/bloomberg-kimmel-institute-for-cancer-immunotherapy }

@@ -2,7 +2,7 @@
 name: "Convergence Institute"
 role: "Institute"
 institution: "Sidney Kimmel Comprehensive Cancer Center, Johns Hopkins"
-group: collaborator
+group: institution
 order: 1
 links:
   - { label: Website, href: https://convergence.jh.edu/ }
